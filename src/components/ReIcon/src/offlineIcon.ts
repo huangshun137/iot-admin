@@ -10,5 +10,9 @@ addIcon("ep:home-filled", HomeFilled);
 // @iconify-icons/ri
 import Search from "@iconify-icons/ri/search-line";
 import InformationLine from "@iconify-icons/ri/information-line";
+import DeviceLine from "@iconify-icons/ri/device-line";
+import ProductHuntLine from "@iconify-icons/ri/product-hunt-line";
 addIcon("ri:search-line", Search);
 addIcon("ri:information-line", InformationLine);
+addIcon("ri:device-line", DeviceLine);
+addIcon("ri:product-hunt-line", ProductHuntLine);

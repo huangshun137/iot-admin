@@ -190,4 +190,12 @@ declare global {
       touched?: boolean;
     };
   }
+
+  // table 合并行
+  interface SpanMethodProps {
+    row: any;
+    column: any;
+    rowIndex: number;
+    columnIndex: number;
+  }
 }

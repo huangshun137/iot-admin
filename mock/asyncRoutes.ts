@@ -17,6 +17,7 @@ const permissionRouter = {
     {
       path: "/permission/page/index",
       name: "PermissionPage",
+      component: "permission/page/index",
       meta: {
         title: "页面权限",
         roles: ["admin", "common"]
