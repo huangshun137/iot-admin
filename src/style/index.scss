@@ -35,3 +35,14 @@
 .html-weakness {
   filter: invert(80%);
 }
+
+/* 全局样式 */
+.my_dialog {
+  .el-checkbox {
+    margin-right: 10px;
+  }
+
+  .el-input-number .el-input__inner {
+    text-align: left;
+  }
+}

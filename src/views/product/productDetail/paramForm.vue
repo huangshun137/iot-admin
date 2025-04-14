@@ -3,6 +3,7 @@ import { reactive, ref } from "vue";
 import ReCol from "@/components/ReCol";
 import { ProductParamInfo } from "@/api/product";
 import type { FormRules } from "element-plus";
+import { ProductPropertyTypeList, NumberTypeList } from "@/utils/const";
 
 type CommandParam = {
   formInline: Omit<ProductParamInfo, "createdAt">;
@@ -12,10 +13,19 @@ const formRules = reactive<FormRules>({
   name: [{ required: true, message: "参数名称为必填项", trigger: "blur" }],
   type: [{ required: true, message: "数据类型为必填项", trigger: "blur" }],
   "dataRange[0]": [
-    { required: true, message: "取值范围为必填项", trigger: "blur" }
+    { required: true, message: "取值范围为必填项" },
+    { min: 0, message: "取值范围为0~65535", type: "number" },
+    { max: 65535, message: "取值范围为0~65535", type: "number" }
   ],
   "dataRange[1]": [
-    { required: true, message: "取值范围为必填项", trigger: "blur" }
+    { required: true, message: "取值范围为必填项" },
+    { min: 0, message: "取值范围为0~65535", type: "number" },
+    { max: 65535, message: "取值范围为0~65535", type: "number" }
+  ],
+  length: [
+    { required: true, message: "长度为必填项" },
+    { min: 0, message: "长度为0~65535", type: "number" },
+    { max: 65535, message: "长度为0~65535", type: "number" }
   ]
 });
 
@@ -25,7 +35,8 @@ const props = withDefaults(defineProps<CommandParam>(), {
     name: "",
     type: "int",
     description: "",
-    dataRange: [0, 65535]
+    dataRange: [0, 65535],
+    length: null
   })
 });
 
@@ -72,13 +83,20 @@ defineExpose({ getRef });
             placeholder="请选择数据类型"
             class="w-full"
           >
-            <el-option label="int(整型)" value="int" />
-            <el-option label="long(长整型)" value="long" />
+            <el-option
+              v-for="item in ProductPropertyTypeList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
           </el-select>
         </el-form-item>
       </re-col>
-      <re-col>
-        <el-form-item label="取值范围">
+      <re-col v-if="newFormInline.type !== 'boolean'">
+        <el-form-item
+          v-if="NumberTypeList.includes(newFormInline.type)"
+          label="取值范围"
+        >
           <el-form-item prop="dataRange[0]">
             <el-input-number
               v-model="newFormInline.dataRange[0]"
@@ -94,6 +112,13 @@ defineExpose({ getRef });
               class="!w-[120px]"
             />
           </el-form-item>
+        </el-form-item>
+        <el-form-item v-else label="长度" prop="length">
+          <el-input-number
+            v-model="newFormInline.length"
+            :controls="false"
+            class="!w-full"
+          />
         </el-form-item>
       </re-col>
     </el-row>

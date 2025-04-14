@@ -1,6 +1,7 @@
 import { http } from "@/utils/http";
 import { baseUrlApi } from "./utils";
 import type { ProductInfo } from "./product";
+import type { OTATaskInfo } from "./ota";
 
 // 设备信息
 export type DeviceInfo = {
@@ -17,6 +18,8 @@ export type DeviceInfo = {
   productId: string;
   /** 设备描述 */
   description: string;
+  /** 设备软件版本 */
+  version: string;
   createdAt: Date;
 };
 // 设备列表接口返回类型
@@ -28,6 +31,36 @@ export type DeviceListResult = {
 export type DeviceDetailResult = {
   success: boolean;
   data: DeviceInfo;
+};
+
+// 设备信息（带设备执行任务）
+export interface DeviceInfoWithOTATask extends DeviceInfo {
+  /** 设备执行中的OTA任务列表 */
+  activeOTAs: OTATaskInfo[];
+  /** 设备是否有执行中的OTA任务 */
+  hasActiveOTA: boolean;
+}
+// 设备详情接口返回类型
+export type DeviceInfoWithOTATaskResult = {
+  success: boolean;
+  data: DeviceInfoWithOTATask[];
+};
+
+// OTA设备信息
+export type OTADeviceInfo = {
+  /** 设备信息 */
+  device: DeviceInfo;
+  /** OTA任务信息 */
+  otaTask: OTATaskInfo;
+  /** 设备OTA状态 */
+  status: string;
+  /** 设备OTA信息描述 */
+  description: string;
+};
+// OTA设备列表接口返回类型
+export type OTADeviceInfoResult = {
+  success: boolean;
+  data: OTADeviceInfo[];
 };
 
 /** 获取设备列表 */
@@ -50,4 +83,26 @@ export const deleteDeviceInfo = (id: string) => {
 /** 获取设备详情 */
 export const getDeviceDetail = (id: string) => {
   return http.request<DeviceDetailResult>("get", baseUrlApi(`devices/${id}`));
+};
+
+/** 获取设备OTA列表 */
+export const getDeviceWithOTAList = (data?: object) => {
+  return http.request<DeviceInfoWithOTATaskResult>(
+    "get",
+    baseUrlApi("devices/getDataWidthOTATask"),
+    {
+      params: data
+    }
+  );
+};
+
+/** 获取设备OTA列表 */
+export const getOTADeviceList = (data?: object) => {
+  return http.request<OTADeviceInfoResult>(
+    "get",
+    baseUrlApi("devices/getOTADeviceList"),
+    {
+      params: data
+    }
+  );
 };

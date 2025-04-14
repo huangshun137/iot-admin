@@ -6,10 +6,9 @@ interface MqttMessage {
   topic: string;
   msg: any;
 }
-export function useMqtt() {
+export function useMqtt(onMessage: (msg: MqttMessage) => void) {
   const client = ref<mqtt.MqttClient | null>(null);
   const isConnected = ref(false);
-  const messages = ref<MqttMessage[]>([]);
 
   // 初始化 MQTT 客户端
   const initMqtt = (url?: string, options?: mqtt.IClientOptions) => {
@@ -23,16 +22,11 @@ export function useMqtt() {
       });
 
       client.value.on("message", (topic, message) => {
-        // console.log(`${topic}:::::::${message}`);
-        const item = messages.value.find(i => i.topic === topic);
-        if (item) {
-          item.msg = JSON.parse(message.toString());
-        } else {
-          messages.value.push({
-            topic,
-            msg: JSON.parse(message.toString())
-          });
-        }
+        console.log(`Received message on topic ${topic}:`, message.toString());
+        onMessage({
+          topic,
+          msg: JSON.parse(message.toString())
+        });
       });
 
       client.value.on("error", err => {
@@ -92,7 +86,6 @@ export function useMqtt() {
 
   return {
     isConnected,
-    messages,
     initMqtt,
     subscribeToTopic,
     publishMessage,

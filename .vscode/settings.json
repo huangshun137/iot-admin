@@ -40,4 +40,5 @@
     "v-ripple"
   ],
   "vscodeCustomCodeColor.highlightValueColor": "#b392f0",
+  "postman.settings.dotenv-detection-notification-visibility": false,
 }

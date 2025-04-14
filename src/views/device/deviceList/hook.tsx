@@ -3,9 +3,9 @@ import editForm from "./form.vue";
 import { message } from "@/utils/message";
 import { getProductList } from "@/api/product";
 import { addDialog } from "@/components/ReDialog";
-import { reactive, ref, onMounted, h } from "vue";
+import { reactive, ref, onMounted, h, onUnmounted } from "vue";
 import { cloneDeep, isAllEmpty, deviceDetection } from "@pureadmin/utils";
-import router from "@/router";
+import { useRouter } from "vue-router";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import {
   addOrUpdateDeviceInfo,
@@ -15,6 +15,8 @@ import {
 } from "@/api/device";
 
 export function useDevice() {
+  const router = useRouter();
+  const intervalId = ref(null);
   const form = reactive({
     name: "",
     code: ""
@@ -29,11 +31,14 @@ export function useDevice() {
     {
       label: "设备名称",
       prop: "name",
-      width: 120
+      align: "left",
+      width: 120,
+      cellRenderer: ({ row }) => row.name || "--"
     },
     {
       label: "设备标识码",
       prop: "code",
+      align: "left",
       minWidth: 100
     },
     {
@@ -76,7 +81,7 @@ export function useDevice() {
     },
     {
       label: "创建时间",
-      minWidth: 200,
+      width: 200,
       prop: "createdAt",
       formatter: ({ createdAt }) =>
         dayjs(createdAt).format("YYYY-MM-DD HH:mm:ss")
@@ -96,11 +101,15 @@ export function useDevice() {
   }
 
   async function getProductListInfo() {
-    const { data } = await getProductList();
+    const { data } = await getProductList({ status: 1 });
     productList.value = data;
   }
 
   async function onSearch() {
+    if (intervalId.value) {
+      clearInterval(intervalId.value);
+      intervalId.value = null;
+    }
     loading.value = true;
     const { data } = await getDeviceList();
     let newData = data;
@@ -113,9 +122,10 @@ export function useDevice() {
       newData = newData.filter(item => item.code === form.code);
     }
     dataList.value = cloneDeep(newData);
-    setTimeout(() => {
-      loading.value = false;
-    }, 500);
+    loading.value = false;
+    if (!intervalId.value) {
+      intervalId.value = setInterval(onSearch, 3000);
+    }
   }
 
   function openDialog(title = "注册", row?: DeviceInfo) {
@@ -188,6 +198,13 @@ export function useDevice() {
   onMounted(() => {
     getProductListInfo();
     onSearch();
+  });
+
+  onUnmounted(() => {
+    if (intervalId.value) {
+      clearInterval(intervalId.value);
+      intervalId.value = null;
+    }
   });
 
   return {

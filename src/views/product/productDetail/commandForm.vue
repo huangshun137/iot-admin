@@ -68,6 +68,24 @@ defineExpose({ getRef, getParamsList });
         </el-form-item>
       </re-col>
       <re-col>
+        <el-form-item label="请求URL" prop="requestUrl">
+          <el-input
+            v-model="newFormInline.requestUrl"
+            clearable
+            placeholder="请输入请求URL"
+          />
+        </el-form-item>
+      </re-col>
+      <re-col>
+        <el-form-item label="请求方法" prop="requestMethod">
+          <el-input
+            v-model="newFormInline.requestMethod"
+            clearable
+            placeholder="请输入请求方法"
+          />
+        </el-form-item>
+      </re-col>
+      <re-col>
         <el-form-item label="下发参数">
           <el-row>
             <el-button

@@ -15,8 +15,8 @@ import {
   useDark
 } from "@pureadmin/utils";
 import type { FormItemProps } from "./types";
-import router from "@/router";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
+import { useRouter } from "vue-router";
 
 const { isDark } = useDark();
 
@@ -37,6 +37,7 @@ const tagStyle = computed(() => {
 });
 
 export function useProduct() {
+  const router = useRouter();
   const form = reactive({
     name: "",
     status: null
@@ -80,7 +81,7 @@ export function useProduct() {
     },
     {
       label: "创建时间",
-      minWidth: 200,
+      width: 200,
       prop: "createdAt",
       formatter: ({ createdAt }) =>
         dayjs(createdAt).format("YYYY-MM-DD HH:mm:ss")

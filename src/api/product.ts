@@ -32,8 +32,12 @@ export type ProductPropertyInfo = {
   name: string;
   type: string;
   accessMethod: string[];
+  requestUrl?: string;
+  requestMethod?: string;
+  requestParam?: string;
   description: string;
   dataRange: number[];
+  length: number | null;
   createdAt: Date;
 };
 // 属性列表接口返回类型
@@ -49,6 +53,7 @@ export type ProductParamInfo = {
   type: string;
   description: string;
   dataRange: number[];
+  length: number | null;
   createdAt: Date;
 };
 // 命令参数列表接口返回类型
@@ -60,6 +65,8 @@ export type ProductParamResult = {
 export type ProductCommandInfo = {
   _id: string;
   name: string;
+  requestUrl?: string;
+  requestMethod?: string;
   reqParams: ProductParamInfo[];
   resParams: ProductParamInfo[];
   createdAt: Date;

@@ -114,11 +114,16 @@ export function usePropertyTable() {
           name: row?.name ?? "",
           type: row?.type ?? "int",
           accessMethod: row?.accessMethod ?? [],
+          requestUrl: row?.requestUrl ?? "",
+          requestMethod: row?.requestMethod ?? "",
+          requestParam: row?.requestParam ?? "",
           description: row?.description ?? "",
-          dataRange: row?.dataRange ?? [0, 65535]
+          dataRange: row?.dataRange ?? [0, 65535],
+          length: row?.length ?? null
         }
       },
       width: "50%",
+      class: "my_dialog",
       draggable: true,
       closeOnClickModal: false,
       contentRenderer: () =>
@@ -219,7 +224,9 @@ export function useCommandTable() {
       props: {
         formInline: {
           _id: row?._id ?? null,
-          name: row?.name ?? ""
+          name: row?.name ?? "",
+          requestUrl: row?.requestUrl ?? "",
+          requestMethod: row?.requestMethod ?? ""
         }
       },
       width: "80%",
@@ -288,10 +295,12 @@ export function useParamTable(
           name: row?.name ?? "",
           type: row?.type ?? "int",
           description: row?.description ?? "",
+          length: row?.length ?? null,
           dataRange: row?.dataRange ?? [0, 65535]
         }
       },
       width: "50%",
+      class: "my_dialog",
       draggable: true,
       closeOnClickModal: false,
       contentRenderer: () => h(paramForm, { ref: formRef, formInline: null }),

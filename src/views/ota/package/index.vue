@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useDevice } from "./hook";
+import { usePackage } from "./hook";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 
 import Delete from "@iconify-icons/ep/delete";
-// import EditPen from "@iconify-icons/ep/edit-pen";
 import Refresh from "@iconify-icons/ep/refresh";
-import View from "@iconify-icons/ep/view";
 import AddFill from "@iconify-icons/ri/add-circle-line";
+import FileDownloadLine from "@iconify-icons/ri/file-download-line";
 
 defineOptions({
-  name: "DeviceList"
+  name: "OTAPackage"
 });
 
 const formRef = ref();
@@ -25,8 +24,8 @@ const {
   resetForm,
   openDialog,
   handleDelete,
-  handleDetail
-} = useDevice();
+  handleDownload
+} = usePackage();
 
 function onFullscreen() {
   // 重置表格高度
@@ -42,18 +41,18 @@ function onFullscreen() {
       :model="form"
       class="search-form bg-bg_color w-[99/100] pl-8 pt-[12px] overflow-auto"
     >
-      <el-form-item label="设备名称：" prop="name">
+      <el-form-item label="资源包名称：" prop="name">
         <el-input
           v-model="form.name"
-          placeholder="请输入设备名称"
+          placeholder="请输入资源包名称"
           clearable
           class="!w-[180px]"
         />
       </el-form-item>
-      <el-form-item label="设备标识码：" prop="code">
+      <el-form-item label="产品名称：" prop="productName">
         <el-input
-          v-model="form.code"
-          placeholder="请输入设备标识码"
+          v-model="form.productName"
+          placeholder="请输入产品名称"
           clearable
           class="!w-[180px]"
         />
@@ -74,7 +73,7 @@ function onFullscreen() {
     </el-form>
 
     <PureTableBar
-      title="设备列表"
+      title="资源包列表"
       :columns="columns"
       :tableRef="tableRef?.getTableRef()"
       @refresh="onSearch"
@@ -86,7 +85,7 @@ function onFullscreen() {
           :icon="useRenderIcon(AddFill)"
           @click="openDialog()"
         >
-          注册设备
+          上传资源包
         </el-button>
       </template>
       <template v-slot="{ size, dynamicColumns }">
@@ -109,25 +108,15 @@ function onFullscreen() {
           }"
         >
           <template #operation="{ row }">
-            <!-- <el-button
-              class="reset-margin"
-              link
-              type="primary"
-              :size="size"
-              :icon="useRenderIcon(EditPen)"
-              @click="openDialog('修改', row)"
-            >
-              修改
-            </el-button> -->
             <el-button
               class="reset-margin"
               link
               type="primary"
               :size="size"
-              :icon="useRenderIcon(View)"
-              @click="handleDetail(row)"
+              :icon="useRenderIcon(FileDownloadLine)"
+              @click="handleDownload(row)"
             >
-              详情
+              下载
             </el-button>
             <el-popconfirm title="是否确认删除" @confirm="handleDelete(row)">
               <template #reference>
@@ -142,46 +131,9 @@ function onFullscreen() {
                 </el-button>
               </template>
             </el-popconfirm>
-            <el-dropdown>
-              <el-button
-                class="reset-margin ml-1"
-                style="margin-top: 3px; margin-left: 10px"
-                link
-                type="primary"
-                :size="size"
-              >
-                更多<el-icon class="el-icon--right"
-                  ><IconifyIconOnline icon="ep-arrow-down"
-                /></el-icon>
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item @click="openDialog('修改', row)"
-                    >修改</el-dropdown-item
-                  >
-                  <el-dropdown-item>获取连接参数</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
           </template>
         </pure-table>
       </template>
     </PureTableBar>
   </div>
 </template>
-
-<style lang="scss" scoped>
-:deep(.el-table__inner-wrapper::before) {
-  height: 0;
-}
-
-.main-content {
-  margin: 24px 24px 0 !important;
-}
-
-.search-form {
-  :deep(.el-form-item) {
-    margin-bottom: 12px;
-  }
-}
-</style>

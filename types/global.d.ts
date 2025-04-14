@@ -198,4 +198,12 @@ declare global {
     rowIndex: number;
     columnIndex: number;
   }
+
+  // common response type
+  type CommonResponse = {
+    success?: boolean;
+    code?: number;
+    message?: string;
+    data?: any;
+  };
 }
