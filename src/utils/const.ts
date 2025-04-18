@@ -17,5 +17,6 @@ export const OtaTaskStatusList = [
   { label: "执行中", value: "running" },
   { label: "已完成", value: "completed" },
   { label: "已取消", value: "canceled" },
+  { label: "停止中", value: "stopping" },
   { label: "执行失败", value: "failed" }
 ];

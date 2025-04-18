@@ -34,7 +34,7 @@ const tableRef = ref();
 const newFormInline = ref(props.formInline);
 
 const { columns, dataList, loading, handlePackageChange, getDeviceListInfo } =
-  useTaskDevice(props.packageList);
+  useTaskDevice(props.packageList, tableRef);
 
 function getRef() {
   return ruleFormRef.value;

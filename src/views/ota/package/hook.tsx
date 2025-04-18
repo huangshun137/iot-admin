@@ -62,16 +62,21 @@ export function usePackage() {
       cellRenderer: ({ row }) => row.product?.name
     },
     {
-      label: "上传时间",
-      width: 200,
-      prop: "createdAt",
-      formatter: ({ createdAt }) =>
-        dayjs(createdAt).format("YYYY-MM-DD HH:mm:ss")
+      label: "软件入口文件",
+      prop: "entry",
+      width: 120
     },
     {
       label: "描述",
       prop: "description",
       width: 120
+    },
+    {
+      label: "上传时间",
+      width: 200,
+      prop: "createdAt",
+      formatter: ({ createdAt }) =>
+        dayjs(createdAt).format("YYYY-MM-DD HH:mm:ss")
     },
     {
       label: "操作",
@@ -120,6 +125,7 @@ export function usePackage() {
           version: row?.version ?? "",
           description: row?.description ?? "",
           productId: row?.product?._id ?? "",
+          entry: row?.entry,
           createdAt: row?.createdAt ?? new Date()
         },
         productList: productList.value
@@ -149,7 +155,10 @@ export function usePackage() {
           if (valid) {
             // 表单规则校验通过
             console.log("curData", curData);
-            const params = { ...curData };
+            const params = {
+              ...curData,
+              entry: curData.entry ? curData.entry.trim() : "main.py"
+            };
             if (!!params.fileList?.length) {
               params.file = params.fileList[0].raw;
               params.md5 = await calculateFileMD5(params.file);
@@ -170,10 +179,15 @@ export function usePackage() {
   }
 
   function handleDelete(row) {
-    deletePackageInfo(row._id).then(() => {
-      message("操作成功", { type: "success" });
-      onSearch();
-    });
+    deletePackageInfo(row._id)
+      .then(() => {
+        message("操作成功", { type: "success" });
+        onSearch();
+      })
+      .catch(err => {
+        console.log(err);
+        message(err.response?.data?.error || "操作失败", { type: "error" });
+      });
   }
 
   function handleDownload(row) {

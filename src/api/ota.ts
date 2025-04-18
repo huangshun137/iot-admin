@@ -13,6 +13,8 @@ export type PackageInfo = {
   version: string;
   /** 资源包描述 */
   description: string;
+  /** 资源包入口文件 */
+  entry?: string;
   /** 资源包所属产品 */
   product: ProductInfo;
   /** 资源包存储地址 */
@@ -112,11 +114,10 @@ export const deleteOTATaskInfo = (id: string) => {
 };
 
 /** 重启单个设备升级任务 */
-export const retryDeviceOTATask = (id: string) => {
-  return http.request<CommonResponse>(
-    "post",
-    baseUrlApi(`otaTasks/retry/${id}`)
-  );
+export const retryDeviceOTATask = (data: object) => {
+  return http.request<CommonResponse>("post", baseUrlApi(`otaTasks/retry`), {
+    data
+  });
 };
 
 /** 终止单个设备升级任务 */
@@ -124,5 +125,13 @@ export const stopDeviceOTATask = (id: string) => {
   return http.request<CommonResponse>(
     "post",
     baseUrlApi(`otaTasks/stop/${id}`)
+  );
+};
+
+/** 终止OTA升级任务 */
+export const stopOTATask = (id: string) => {
+  return http.request<CommonResponse>(
+    "post",
+    baseUrlApi(`otaTasks/stopTask/${id}`)
   );
 };

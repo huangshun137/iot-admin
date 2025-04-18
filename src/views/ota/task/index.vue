@@ -32,6 +32,7 @@ const {
   resetForm,
   openDialog,
   handleDelete,
+  handleStop,
   handleDetail
 } = useOTATask();
 
@@ -41,9 +42,9 @@ const {
   loading: detailLoading,
   getDeviceListInfo,
   handleRetry,
-  handleStop,
+  handleStop: handleStopDetail,
   handleDelete: handleDeleteDetail
-} = useTaskDetail(taskDetail);
+} = useTaskDetail(taskDetail, drawer);
 
 function onFullscreen() {
   // 重置表格高度
@@ -87,7 +88,7 @@ function onFullscreen() {
           type="primary"
           :icon="useRenderIcon('ri:search-line')"
           :loading="loading"
-          @click="onSearch"
+          @click="onSearch(false)"
         >
           搜索
         </el-button>
@@ -145,6 +146,9 @@ function onFullscreen() {
             <el-popconfirm
               v-if="row.status !== 'running' && row.status !== 'pending'"
               title="是否确认删除"
+              :disabled="
+                row.status === 'completed' || row.status === 'stopping'
+              "
               @confirm="handleDelete(row)"
             >
               <template #reference>
@@ -154,6 +158,9 @@ function onFullscreen() {
                   type="primary"
                   :size="size"
                   :icon="useRenderIcon(Delete)"
+                  :disabled="
+                    row.status === 'completed' || row.status === 'stopping'
+                  "
                 >
                   删除
                 </el-button>
@@ -166,6 +173,7 @@ function onFullscreen() {
               type="primary"
               :size="size"
               :icon="useRenderIcon(StopFill)"
+              @click="handleStop(row)"
               >停止</el-button
             >
           </template>
@@ -231,7 +239,12 @@ function onFullscreen() {
                       :size="size"
                       :icon="useRenderIcon(Refresh)"
                       :disabled="
-                        row.status === 'running' || row.status === 'pending'
+                        // taskDetail.status === 'stopping' ||
+                        // taskDetail.status === 'canceled' ||
+                        row.status === 'running' ||
+                        row.status === 'pending' ||
+                        row.status === 'completed' ||
+                        row.status === 'stopping'
                       "
                       @click="handleRetry(row)"
                     >
@@ -242,6 +255,9 @@ function onFullscreen() {
                         row.status !== 'running' && row.status !== 'pending'
                       "
                       title="是否确认删除"
+                      :disabled="
+                        row.status === 'completed' || row.status === 'stopping'
+                      "
                       @confirm="handleDeleteDetail(row)"
                     >
                       <template #reference>
@@ -250,6 +266,10 @@ function onFullscreen() {
                           link
                           type="primary"
                           :size="size"
+                          :disabled="
+                            row.status === 'completed' ||
+                            row.status === 'stopping'
+                          "
                           :icon="useRenderIcon(Delete)"
                         >
                           删除
@@ -263,7 +283,7 @@ function onFullscreen() {
                       type="primary"
                       :size="size"
                       :icon="useRenderIcon(StopFill)"
-                      @click="handleStop(row)"
+                      @click="handleStopDetail(row)"
                       >停止</el-button
                     >
                   </template>

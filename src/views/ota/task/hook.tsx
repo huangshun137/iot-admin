@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import editForm from "./form.vue";
 import { message } from "@/utils/message";
 import { addDialog } from "@/components/ReDialog";
-import { reactive, ref, onMounted, h, watch, type Ref } from "vue";
+import { reactive, ref, onMounted, h, watch, type Ref, onUnmounted } from "vue";
 import { cloneDeep, isAllEmpty, deviceDetection } from "@pureadmin/utils";
 import {
   addOTATaskInfo,
@@ -12,10 +12,12 @@ import {
   getPackageList,
   type PackageInfo,
   retryDeviceOTATask,
-  stopDeviceOTATask
+  stopDeviceOTATask,
+  stopOTATask
 } from "@/api/ota";
 import { getDeviceWithOTAList, getOTADeviceList } from "@/api/device";
 import { OtaTaskStatusList } from "@/utils/const";
+import { ElCheckbox, ElTooltip } from "element-plus";
 
 export function useOTATask() {
   const form = reactive({
@@ -24,6 +26,7 @@ export function useOTATask() {
   });
 
   const formRef = ref();
+  const timeoutId = ref(null);
   const dataList = ref([]);
   const loading = ref(true);
   const packageList = ref([]);
@@ -75,8 +78,12 @@ export function useOTATask() {
     packageList.value = data;
   }
 
-  async function onSearch() {
-    loading.value = true;
+  async function onSearch(timeoutFlag = false) {
+    if (timeoutId.value) {
+      clearInterval(timeoutId.value);
+      timeoutId.value = null;
+    }
+    !timeoutFlag && (loading.value = true);
     const { data } = await getOTATaskList();
     let newData = data;
     if (!isAllEmpty(form.name)) {
@@ -88,7 +95,15 @@ export function useOTATask() {
       newData = newData.filter(item => item.status === form.status);
     }
     dataList.value = cloneDeep(newData);
-    loading.value = false;
+    !timeoutFlag && (loading.value = false);
+    if (drawer.value) {
+      taskDetail.value = dataList.value.find(
+        item => item._id === taskDetail.value._id
+      );
+    }
+    if (!timeoutId.value) {
+      timeoutId.value = setTimeout(() => onSearch(true), 3000);
+    }
   }
 
   function openDialog(row?: OTATaskInfo) {
@@ -149,6 +164,15 @@ export function useOTATask() {
     drawer.value = true;
   }
 
+  function handleStop(row) {
+    stopOTATask(row._id).then(res => {
+      if (res.success) {
+        message("操作成功", { type: "success" });
+        onSearch();
+      }
+    });
+  }
+
   function handleDelete(row) {
     deleteOTATaskInfo(row._id).then(() => {
       message("操作成功", { type: "success" });
@@ -159,6 +183,13 @@ export function useOTATask() {
   onMounted(() => {
     getPackageListInfo();
     onSearch();
+  });
+
+  onUnmounted(() => {
+    if (timeoutId.value) {
+      clearTimeout(timeoutId.value);
+      timeoutId.value = null;
+    }
   });
 
   return {
@@ -176,20 +207,54 @@ export function useOTATask() {
     openDialog,
     /** 删除 */
     handleDelete,
+    handleStop,
     handleDetail
   };
 }
 
-export function useTaskDevice(packageList: PackageInfo[]) {
+export function useTaskDevice(packageList: PackageInfo[], tableRef) {
   const dataList = ref([]);
   const loading = ref(false);
-  const selectedProductId = ref("");
+  const selectedPackageInfo = ref<PackageInfo>(null);
 
   const columns: TableColumnList = [
     {
       type: "selection",
       selectable: row => {
-        return !row.hasActiveOTA;
+        return (
+          !row.hasActiveOTA && row.version !== selectedPackageInfo.value.version
+        );
+      },
+      cellRenderer: ({ row }) => {
+        const isDisabled =
+          row.hasActiveOTA || row.version === selectedPackageInfo.value.version;
+        const tooltipContent = isDisabled
+          ? row.hasActiveOTA
+            ? "存在执行中的OTA任务"
+            : "当前版本已升级到目标版本"
+          : "";
+
+        const _selectedRows = tableRef.value?.getTableRef()?.getSelectionRows();
+        const isSelected = _selectedRows.some(
+          selectedRow => selectedRow._id === row._id
+        );
+
+        // TODO::::::::暂时先用v-model绑定勾选状态，问题是行内选中会报错，但效果是好的
+        // 如果不用v-model用checked绑定勾选状态，全选时页面单行选中状态不会改变
+        return isDisabled ? (
+          <ElTooltip content={tooltipContent} placement="top">
+            <span class="disabled-checkbox-wrapper">
+              <ElCheckbox disabled v-model={isSelected} />
+            </span>
+          </ElTooltip>
+        ) : (
+          <ElCheckbox
+            v-model={isSelected}
+            onChange={(checked: boolean) =>
+              tableRef.value?.getTableRef()?.toggleRowSelection(row, checked)
+            }
+          />
+        );
       }
     },
     {
@@ -233,31 +298,41 @@ export function useTaskDevice(packageList: PackageInfo[]) {
   ];
 
   function handlePackageChange(packageId) {
-    selectedProductId.value = packageList.find(
+    selectedPackageInfo.value = packageList.find(
       item => item._id === packageId
-    )?.product?._id;
+    );
     getDeviceListInfo();
   }
 
   async function getDeviceListInfo() {
-    if (!selectedProductId.value) {
+    if (!selectedPackageInfo.value?.product) {
       dataList.value = [];
       return;
     }
     loading.value = true;
     const { data } = await getDeviceWithOTAList({
-      productId: selectedProductId.value
+      productId: selectedPackageInfo.value.product._id
     });
     dataList.value = data;
     loading.value = false;
   }
 
-  return { columns, dataList, loading, handlePackageChange, getDeviceListInfo };
+  return {
+    columns,
+    dataList,
+    loading,
+    handlePackageChange,
+    getDeviceListInfo
+  };
 }
 
-export function useTaskDetail(taskDetail: Ref<OTATaskInfo>) {
+export function useTaskDetail(
+  taskDetail: Ref<OTATaskInfo>,
+  drawer: Ref<boolean>
+) {
   const dataList = ref([]);
   const loading = ref(false);
+  const timeoutId = ref(null);
 
   const columns: TableColumnList = [
     {
@@ -292,26 +367,47 @@ export function useTaskDetail(taskDetail: Ref<OTATaskInfo>) {
   ];
 
   watch(
-    () => taskDetail.value._id,
-    value => {
-      value && getDeviceListInfo();
+    () => [taskDetail.value._id, drawer],
+    ([value, drawer], [oldValue, oldDrawer]) => {
+      (oldValue !== value || (drawer && !oldDrawer)) && getDeviceListInfo();
     }
   );
 
   async function getDeviceListInfo() {
+    if (timeoutId.value) {
+      clearInterval(timeoutId.value);
+      timeoutId.value = null;
+    }
+    if (!taskDetail.value._id) return;
     loading.value = true;
     const { data } = await getOTADeviceList({ taskId: taskDetail.value._id });
     dataList.value = data;
     loading.value = false;
+    if (
+      !timeoutId.value &&
+      (taskDetail.value.status === "running" ||
+        taskDetail.value.status === "pending" ||
+        taskDetail.value.status === "stopping")
+    ) {
+      timeoutId.value = setTimeout(getDeviceListInfo, 3000);
+    }
   }
 
   function handleRetry(row) {
-    retryDeviceOTATask(row._id).then(res => {
-      if (res.success) {
-        message("操作成功", { type: "success" });
-        getDeviceListInfo();
-      }
-    });
+    retryDeviceOTATask({
+      id: row._id,
+      packageId: taskDetail.value.package._id
+    })
+      .then(res => {
+        if (res.success) {
+          message("操作成功", { type: "success" });
+          getDeviceListInfo();
+        }
+      })
+      .catch(err => {
+        console.log(err);
+        message(err.response?.data?.error || "操作失败", { type: "error" });
+      });
   }
 
   function handleStop(row) {
@@ -326,6 +422,13 @@ export function useTaskDetail(taskDetail: Ref<OTATaskInfo>) {
   function handleDelete(row) {
     console.log(row);
   }
+
+  onUnmounted(() => {
+    if (timeoutId.value) {
+      clearTimeout(timeoutId.value);
+      timeoutId.value = null;
+    }
+  });
 
   return {
     columns,

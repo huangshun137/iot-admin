@@ -149,6 +149,14 @@ defineExpose({ getRef });
         </el-form-item>
       </re-col>
       <re-col>
+        <el-form-item label="资源包入口文件" prop="entry">
+          <el-input
+            v-model="newFormInline.entry"
+            placeholder="请输入资源包入口文件（默认为main.py）"
+          />
+        </el-form-item>
+      </re-col>
+      <re-col>
         <el-form-item label="描述">
           <el-input
             v-model="newFormInline.description"
