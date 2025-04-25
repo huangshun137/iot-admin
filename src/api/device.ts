@@ -1,7 +1,7 @@
 import { http } from "@/utils/http";
-import { baseUrlApi } from "./utils";
-import type { ProductInfo } from "./product";
 import type { OTATaskInfo } from "./ota";
+import type { ProductInfo } from "./product";
+import { baseUrlApi } from "./utils";
 
 // 设备信息
 export type DeviceInfo = {
@@ -13,13 +13,14 @@ export type DeviceInfo = {
   code: string;
   /** 设备ID */
   deviceId: string;
+  ipAddress?: string;
   product: ProductInfo;
   /** 产品id */
   productId: string;
   /** 设备描述 */
   description: string;
   /** 设备软件版本 */
-  version: string;
+  version?: string;
   createdAt: Date;
 };
 // 设备列表接口返回类型

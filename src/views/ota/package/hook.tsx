@@ -1,25 +1,26 @@
-import dayjs from "dayjs";
-import editForm from "./form.vue";
-import { message } from "@/utils/message";
-import { getProductList } from "@/api/product";
-import { addDialog } from "@/components/ReDialog";
-import { reactive, ref, onMounted, h } from "vue";
-import {
-  cloneDeep,
-  isAllEmpty,
-  deviceDetection,
-  createFormData,
-  // downloadByUrl,
-  downloadByData
-} from "@pureadmin/utils";
 import {
   addPackageInfo,
-  getPackageList,
   deletePackageInfo,
-  type PackageInfo,
-  downloadPackageInfo
+  downloadPackageInfo,
+  getPackageList,
+  type PackageInfo
 } from "@/api/ota";
+import { getProductList } from "@/api/product";
+import { addDialog } from "@/components/ReDialog";
+import { message } from "@/utils/message";
 import { calculateFileMD5 } from "@/utils/others";
+import {
+  cloneDeep,
+  createFormData,
+  deviceDetection,
+  // downloadByUrl,
+  downloadByData,
+  isAllEmpty
+} from "@pureadmin/utils";
+import dayjs from "dayjs";
+import { ElLoading } from "element-plus";
+import { h, onMounted, reactive, ref } from "vue";
+import editForm from "./form.vue";
 
 export function usePackage() {
   const form = reactive({
@@ -167,11 +168,19 @@ export function usePackage() {
             if (!params._id) {
               delete params._id;
             }
+            const loading = ElLoading.service({
+              lock: true,
+              text: "Loading"
+            });
             const formData = createFormData(params);
             console.log(formData);
-            addPackageInfo(formData).then(() => {
-              chores();
-            });
+            addPackageInfo(formData)
+              .then(() => {
+                chores();
+              })
+              .finally(() => {
+                loading.close();
+              });
           }
         });
       }

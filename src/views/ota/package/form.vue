@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { nextTick, reactive, ref, watch } from "vue";
-import { FormRules } from "element-plus";
-import ReCol from "@/components/ReCol";
-import { ProductInfo } from "@/api/product";
 import { PackageInfo } from "@/api/ota";
-import UploadIcon from "@iconify-icons/ri/upload-2-line";
+import { ProductInfo } from "@/api/product";
+import ReCol from "@/components/ReCol";
 import { message } from "@/utils/message";
+import UploadIcon from "@iconify-icons/ri/upload-2-line";
+import { FormRules } from "element-plus";
+import { computed, reactive, ref, watch } from "vue";
 
 interface FormInline
   extends Omit<PackageInfo, "createdAt" | "product" | "filePath"> {
@@ -21,6 +21,7 @@ const formRules = reactive<FormRules>({
   productId: [{ required: true, message: "产品为必填项" }],
   version: [{ required: true, message: "资源包版本为必填项" }],
   name: [{ required: true, message: "资源包名称为必填项" }],
+  processPath: [{ required: true, message: "资源包运行目录为必填项" }],
   fileList: [
     {
       required: true,
@@ -49,6 +50,12 @@ const newFormInline = ref(props.formInline);
 function getRef() {
   return ruleFormRef.value;
 }
+
+const selectedProduct = computed(() => {
+  return props.productList.find(
+    item => item._id === newFormInline.value.productId
+  );
+});
 
 watch(
   () => newFormInline.value.fileList,
@@ -145,6 +152,14 @@ defineExpose({ getRef });
           <el-input
             v-model="newFormInline.name"
             placeholder="请输入资源包名称"
+          />
+        </el-form-item>
+      </re-col>
+      <re-col v-if="selectedProduct?.type === 'Agent'">
+        <el-form-item label="资源包运行目录" prop="processPath">
+          <el-input
+            v-model="newFormInline.processPath"
+            placeholder="请输入资源包运行目录"
           />
         </el-form-item>
       </re-col>

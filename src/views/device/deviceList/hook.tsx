@@ -1,18 +1,18 @@
-import dayjs from "dayjs";
-import editForm from "./form.vue";
-import { message } from "@/utils/message";
-import { getProductList } from "@/api/product";
-import { addDialog } from "@/components/ReDialog";
-import { reactive, ref, onMounted, h, onUnmounted } from "vue";
-import { cloneDeep, isAllEmpty, deviceDetection } from "@pureadmin/utils";
-import { useRouter } from "vue-router";
-import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import {
   addOrUpdateDeviceInfo,
   deleteDeviceInfo,
   getDeviceList,
   type DeviceInfo
 } from "@/api/device";
+import { getProductList } from "@/api/product";
+import { addDialog } from "@/components/ReDialog";
+import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
+import { message } from "@/utils/message";
+import { cloneDeep, deviceDetection, isAllEmpty } from "@pureadmin/utils";
+import dayjs from "dayjs";
+import { h, onMounted, onUnmounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
+import editForm from "./form.vue";
 
 export function useDevice() {
   const router = useRouter();
@@ -137,6 +137,7 @@ export function useDevice() {
           name: row?.name ?? "",
           code: row?.code ?? "",
           deviceId: row?.deviceId ?? "",
+          ipAddress: row?.ipAddress ?? "",
           productId: row?.product?._id ?? "",
           description: row?.description ?? ""
         },

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
-import { FormRules } from "element-plus";
-import ReCol from "@/components/ReCol";
 import { DeviceInfo } from "@/api/device";
 import { ProductInfo } from "@/api/product";
+import ReCol from "@/components/ReCol";
+import { FormRules } from "element-plus";
+import { reactive, ref } from "vue";
 
 interface FormProps {
   formInline: Omit<DeviceInfo, "createdAt" | "product">;
@@ -28,6 +28,7 @@ const props = withDefaults(defineProps<FormProps>(), {
     name: "",
     code: "",
     deviceId: "",
+    ipAddress: "",
     productId: "",
     description: ""
   }),
@@ -103,6 +104,15 @@ defineExpose({ getRef });
             clearable
             placeholder="请输入设备ID"
             :disabled="!!newFormInline._id"
+          />
+        </el-form-item>
+      </re-col>
+      <re-col>
+        <el-form-item label="设备IP" prop="ipAddress">
+          <el-input
+            v-model="newFormInline.ipAddress"
+            clearable
+            placeholder="请输入设备IP"
           />
         </el-form-item>
       </re-col>

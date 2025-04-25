@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { computed } from "vue";
-import dayjs from "dayjs";
 import { ReText } from "@/components/ReText";
+import dayjs from "dayjs";
+import { computed } from "vue";
 import { useDeviceDetail, useMqttPropertyInfo, usePropertyInfo } from "./hook";
 
 defineOptions({
@@ -65,6 +65,7 @@ const { propertyInfo, openDialog } = useMqttPropertyInfo(
           </div>
         </div>
       </template>
+      <p>最后更新时间：{{ propertyInfo.lastUpdate ?? "--" }}</p>
       <div class="property-card">
         <el-card
           v-for="(item, index) in propertyList.filter(item =>
@@ -84,7 +85,13 @@ const { propertyInfo, openDialog } = useMqttPropertyInfo(
             type="primary"
             @click="openDialog('property', item)"
           >
-            <span v-if="!propertyInfo?.[item.name]">--</span>
+            <span
+              v-if="
+                propertyInfo?.[item.name] === null ||
+                propertyInfo?.[item.name] === undefined
+              "
+              >--</span
+            >
             <template v-else-if="item.type === 'jsonObject'">
               <p
                 v-for="(key, value) in JSON.parse(propertyInfo[item.name])"
@@ -97,7 +104,13 @@ const { propertyInfo, openDialog } = useMqttPropertyInfo(
             <span v-else>{{ propertyInfo[item.name] }}</span>
           </el-button>
           <div v-else class="property-content">
-            <span v-if="!propertyInfo?.[item.name]">--</span>
+            <span
+              v-if="
+                propertyInfo?.[item.name] === null ||
+                propertyInfo?.[item.name] === undefined
+              "
+              >--</span
+            >
             <template v-else-if="item.type === 'jsonObject'">
               <p
                 v-for="(value, key) in propertyInfo[item.name]"
@@ -111,6 +124,21 @@ const { propertyInfo, openDialog } = useMqttPropertyInfo(
           </div>
         </el-card>
       </div>
+    </el-card>
+
+    <el-card
+      v-if="deviceDetail?.product?.type === '相机' && deviceDetail?.ipAddress"
+      class="mt-3"
+    >
+      <template #header>
+        <h3>相机实时画面</h3>
+      </template>
+      <el-image
+        v-loading="detailLoading"
+        class="w-full h-[400px]"
+        :src="`http://${deviceDetail.ipAddress}:5000/video_feed`"
+        fit="contain"
+      />
     </el-card>
   </div>
 </template>

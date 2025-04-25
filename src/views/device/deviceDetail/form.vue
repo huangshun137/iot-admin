@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import ReCol from "@/components/ReCol";
 import {
   getCommandReqParamList,
   ProductCommandInfo,
   ProductPropertyInfo
 } from "@/api/product";
-import { cloneDeep } from "@pureadmin/utils";
+import ReCol from "@/components/ReCol";
 import { NumberTypeList } from "@/utils/const";
+import { cloneDeep } from "@pureadmin/utils";
+import { ref } from "vue";
 
 interface FormInline {
   optionValue: string | null;
@@ -175,6 +175,7 @@ defineExpose({ getRef, getCurFormData });
                 v-model="newFormInline[item.name]"
                 class="!w-full"
                 type="textarea"
+                :placeholder="item.description"
               />
             </el-form-item>
           </template>

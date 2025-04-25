@@ -1,7 +1,7 @@
 import { http } from "@/utils/http";
-import { baseUrlApi } from "./utils";
-import type { ProductInfo } from "./product";
 import type { PureHttpRequestConfig } from "@/utils/http/types";
+import type { ProductInfo } from "./product";
+import { baseUrlApi } from "./utils";
 
 // OTA 资源包信息
 export type PackageInfo = {
@@ -15,6 +15,8 @@ export type PackageInfo = {
   description: string;
   /** 资源包入口文件 */
   entry?: string;
+  /** 资源包运行目录 */
+  processPath?: string;
   /** 资源包所属产品 */
   product: ProductInfo;
   /** 资源包存储地址 */
@@ -78,8 +80,24 @@ export const downloadPackageInfo = (id: string) => {
       beforeResponseCallback: response => {
         if (response.status === 200) {
           const contentDisposition = response.headers["content-disposition"];
-          const filename = contentDisposition.split("filename=")[1];
-          response.data.filename = filename.replace(/['"]/g, "");
+          let filename = "";
+
+          // 解析 filename* 参数
+          const filenameMatch = contentDisposition.match(
+            /filename[^=]*=UTF-8''([^;]+)/
+          );
+          if (filenameMatch && filenameMatch[1]) {
+            filename = decodeURIComponent(filenameMatch[1]);
+          } else {
+            // 如果没有 filename*，则解析 filename 参数
+            const filenameFallbackMatch =
+              contentDisposition.match(/filename="([^"]+)"/);
+            if (filenameFallbackMatch && filenameFallbackMatch[1]) {
+              filename = filenameFallbackMatch[1].replace(/['"]/g, "");
+            }
+          }
+
+          response.data.filename = filename;
         }
       }
     } as PureHttpRequestConfig

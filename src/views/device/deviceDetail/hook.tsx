@@ -1,3 +1,14 @@
+import { type DeviceInfo, getDeviceDetail } from "@/api/device";
+import {
+  getProductCommandList,
+  getProductPropertyList,
+  type ProductCommandInfo,
+  type ProductPropertyInfo
+} from "@/api/product";
+import { addDialog } from "@/components/ReDialog";
+import { message as MyMessage } from "@/utils/message";
+import useMqtt from "@/utils/useMqtt";
+import dayjs from "dayjs";
 import {
   type ComputedRef,
   h,
@@ -8,17 +19,7 @@ import {
   watch
 } from "vue";
 import { useRoute } from "vue-router";
-import { getDeviceDetail, type DeviceInfo } from "@/api/device";
-import {
-  getProductCommandList,
-  getProductPropertyList,
-  type ProductCommandInfo,
-  type ProductPropertyInfo
-} from "@/api/product";
-import useMqtt from "@/utils/useMqtt";
-import { addDialog } from "@/components/ReDialog";
 import editForm from "./form.vue";
-import { message as MyMessage } from "@/utils/message";
 
 export function useDeviceDetail() {
   const route = useRoute();
@@ -174,7 +175,10 @@ export function useMqttPropertyInfo(
     } else if (topic.indexOf("/sys/properties/report") > -1) {
       // 属性上报
       // console.log("属性上报", msg);
-      propertyInfo.value = msg;
+      propertyInfo.value = {
+        ...msg,
+        lastUpdate: dayjs().format("YYYY-MM-DD HH:mm:ss")
+      };
     } else if (topic.indexOf("/sys/commands/response/request_id") > -1) {
       // 命令下发响应消息
       if (topic.indexOf(request_id.value.toString()) > -1) {

@@ -1,23 +1,23 @@
-import dayjs from "dayjs";
-import editForm from "./form.vue";
-import { message } from "@/utils/message";
-import { addDialog } from "@/components/ReDialog";
-import { reactive, ref, onMounted, h, watch, type Ref, onUnmounted } from "vue";
-import { cloneDeep, isAllEmpty, deviceDetection } from "@pureadmin/utils";
+import { getDeviceWithOTAList, getOTADeviceList } from "@/api/device";
 import {
   addOTATaskInfo,
-  getOTATaskList,
   deleteOTATaskInfo,
-  type OTATaskInfo,
+  getOTATaskList,
   getPackageList,
-  type PackageInfo,
   retryDeviceOTATask,
   stopDeviceOTATask,
-  stopOTATask
+  stopOTATask,
+  type OTATaskInfo,
+  type PackageInfo
 } from "@/api/ota";
-import { getDeviceWithOTAList, getOTADeviceList } from "@/api/device";
+import { addDialog } from "@/components/ReDialog";
 import { OtaTaskStatusList } from "@/utils/const";
+import { message } from "@/utils/message";
+import { cloneDeep, deviceDetection, isAllEmpty } from "@pureadmin/utils";
+import dayjs from "dayjs";
 import { ElCheckbox, ElTooltip } from "element-plus";
+import { h, onMounted, onUnmounted, reactive, ref, watch, type Ref } from "vue";
+import editForm from "./form.vue";
 
 export function useOTATask() {
   const form = reactive({
@@ -385,9 +385,9 @@ export function useTaskDetail(
     loading.value = false;
     if (
       !timeoutId.value &&
-      (taskDetail.value.status === "running" ||
-        taskDetail.value.status === "pending" ||
-        taskDetail.value.status === "stopping")
+      data.some(item =>
+        ["running", "pending", "stopping"].includes(item.status)
+      )
     ) {
       timeoutId.value = setTimeout(getDeviceListInfo, 3000);
     }
