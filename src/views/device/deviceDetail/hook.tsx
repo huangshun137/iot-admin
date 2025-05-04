@@ -1,4 +1,12 @@
-import { type DeviceInfo, getDeviceDetail } from "@/api/device";
+import {
+  addOrUpdateAgentDeviceInfo,
+  type AgentDeviceInfo,
+  deleteAgentDeviceInfo,
+  type DeviceInfo,
+  getAgentDeviceList,
+  getDeviceDetail,
+  getDeviceList
+} from "@/api/device";
 import {
   getProductCommandList,
   getProductPropertyList,
@@ -19,6 +27,7 @@ import {
   watch
 } from "vue";
 import { useRoute } from "vue-router";
+import deviceForm from "./deviceForm.vue";
 import editForm from "./form.vue";
 
 export function useDeviceDetail() {
@@ -262,5 +271,163 @@ export function useMqttPropertyInfo(
     // 在组件卸载时断开 MQTT 连接
     disconnect();
   });
-  return { propertyInfo, openDialog };
+  return { propertyInfo, openDialog, publishMessage };
+}
+
+export function useDeviceAgent(deviceDetail, publishMessage) {
+  const route = useRoute();
+  const deviceId = route.params.id as string;
+
+  const columns: TableColumnList = [
+    {
+      label: "自定义设备",
+      prop: "isCustomDevice",
+      width: 100,
+      cellRenderer: ({ row }) => (row.isCustomDevice ? "是" : "否")
+    },
+    {
+      label: "设备名称",
+      prop: "deviceName",
+      minWidth: 120,
+      cellRenderer: ({ row }) =>
+        row.isCustomDevice ? row.deviceName : row.device?.name || "--"
+    },
+    {
+      label: "设备标识码",
+      prop: "deviceCode",
+      minWidth: 120,
+      cellRenderer: ({ row }) => row.device?.code
+    },
+    {
+      label: "运行目录",
+      prop: "directory",
+      minWidth: 120
+    },
+    {
+      label: "入口文件名",
+      prop: "entryName",
+      minWidth: 120
+    },
+    {
+      label: "运行环境",
+      prop: "condaEnv",
+      width: 100
+    },
+    {
+      label: "操作",
+      fixed: "right",
+      width: 210,
+      slot: "operation"
+    }
+  ];
+
+  const formRef = ref();
+  const loading = ref(false);
+  const dataList = ref([]);
+  const deviceList = ref([]);
+  async function onGetDeviceList() {
+    const { data } = await getDeviceList();
+    deviceList.value = data.filter(item => item.product?.type !== "Agent");
+  }
+  async function getDeviceAgent() {
+    loading.value = true;
+    const { data } = await getAgentDeviceList({
+      agentId: deviceId
+    });
+    dataList.value = data;
+    loading.value = false;
+  }
+
+  function openDialog(title = "绑定", row?: AgentDeviceInfo) {
+    addDialog({
+      title: `${title}设备`,
+      props: {
+        formInline: {
+          _id: row?._id ?? null,
+          isCustomDevice: row?.isCustomDevice ?? false,
+          device: row?.device,
+          deviceId: row?.device?._id,
+          deviceName: row?.deviceName ?? "",
+          agentId: row?.agentId ?? "",
+          directory: row?.directory ?? "",
+          entryName: row?.entryName ?? "",
+          condaEnv: row?.condaEnv
+        },
+        deviceList: deviceList.value
+      },
+      width: "50%",
+      draggable: true,
+      contentRenderer: () =>
+        h(deviceForm, {
+          ref: formRef,
+          formInline: null,
+          deviceList: []
+        }),
+      beforeSure: (done, { options }) => {
+        const FormRef = formRef.value.getRef();
+        const curData = options.props.formInline;
+
+        FormRef.validate(valid => {
+          if (valid) {
+            // 表单规则校验通过
+            console.log("curData", curData);
+            addOrUpdateAgentDeviceInfo({ ...curData, agentId: deviceId })
+              .then(() => {
+                MyMessage("操作成功", {
+                  type: "success"
+                });
+                done(); // 关闭弹框
+                getDeviceAgent(); // 刷新表格数据
+              })
+              .catch(err => {
+                console.log(err);
+                MyMessage(err.response.data.message || "操作失败", {
+                  type: "error"
+                });
+              });
+          }
+        });
+      }
+    });
+  }
+
+  function handleAgentDelete(row: AgentDeviceInfo) {
+    deleteAgentDeviceInfo(row._id).then(() => {
+      MyMessage("操作成功", { type: "success" });
+      getDeviceAgent();
+    });
+  }
+
+  function handleReset(row: AgentDeviceInfo) {
+    const topic = `/devices/${deviceDetail.value.deviceId}/sys/messages/down`;
+    const msg = {
+      type: "restart",
+      isCustomDevice: row.isCustomDevice,
+      directory: row.directory,
+      entryName: row.entryName,
+      condaEnv: row.condaEnv
+    };
+    publishMessage(topic, JSON.stringify(msg), err => {
+      if (err) {
+        MyMessage(err || "操作失败", { type: "error" });
+      } else {
+        MyMessage("操作成功", { type: "success" });
+      }
+    });
+  }
+
+  onMounted(() => {
+    onGetDeviceList();
+    getDeviceAgent();
+  });
+
+  return {
+    columns,
+    loading,
+    dataList,
+    getDeviceAgent,
+    openDialog,
+    handleAgentDelete,
+    handleReset
+  };
 }

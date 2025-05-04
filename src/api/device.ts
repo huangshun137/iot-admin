@@ -64,6 +64,31 @@ export type OTADeviceInfoResult = {
   data: OTADeviceInfo[];
 };
 
+// Agent绑定设备信息
+export type AgentDeviceInfo = {
+  _id: string;
+  /** 是否为自定义设备 */
+  isCustomDevice: boolean;
+  /** 设备名称 */
+  deviceName: string;
+  /** 设备信息 */
+  device: DeviceInfo;
+  deviceId: string;
+  /** 绑定者Agent信息 */
+  agentId: string;
+  /** 设备运行目录 */
+  directory: string;
+  /** 设备运行入口文件 */
+  entryName: string;
+  /** 设备运行conda环境 */
+  condaEnv?: string;
+};
+// Agent绑定设备列表接口返回类型
+export type AgentDeviceInfoResult = {
+  success: boolean;
+  data: AgentDeviceInfo[];
+};
+
 /** 获取设备列表 */
 export const getDeviceList = (data?: object) => {
   return http.request<DeviceListResult>("get", baseUrlApi("devices"), {
@@ -106,4 +131,21 @@ export const getOTADeviceList = (data?: object) => {
       params: data
     }
   );
+};
+
+/** 获取设备列表 */
+export const getAgentDeviceList = (data?: object) => {
+  return http.request<DeviceListResult>("get", baseUrlApi("agentDevices"), {
+    params: data
+  });
+};
+
+/** 新增/更新设备信息 */
+export const addOrUpdateAgentDeviceInfo = (data: object) => {
+  return http.request("post", baseUrlApi("agentDevices"), { data });
+};
+
+/** 删除设备信息 */
+export const deleteAgentDeviceInfo = (id: string) => {
+  return http.request("delete", baseUrlApi(`agentDevices/${id}`));
 };

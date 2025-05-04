@@ -1,5 +1,5 @@
-import { ref } from "vue";
 import mqtt from "mqtt";
+import { ref } from "vue";
 const { VITE_MQTT_BROKER } = import.meta.env;
 
 interface MqttMessage {
@@ -54,9 +54,14 @@ export function useMqtt(onMessage: (msg: MqttMessage) => void) {
   };
 
   // 发布消息
-  const publishMessage = (topic: string, message: string) => {
+  const publishMessage = (
+    topic: string,
+    message: string,
+    callback?: (err) => void
+  ) => {
     if (client.value && isConnected.value) {
       client.value.publish(topic, message, err => {
+        callback && callback(err);
         if (err) {
           console.error("Failed to publish message:", err);
         } else {
@@ -70,6 +75,7 @@ export function useMqtt(onMessage: (msg: MqttMessage) => void) {
   const disconnect = () => {
     if (client.value) {
       client.value.end();
+      client.value = null;
     }
   };
 
