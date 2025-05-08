@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { ref } from "vue";
 import dayjs from "dayjs";
+import { ref } from "vue";
 
-import { useOTATask, useTaskDetail } from "./hook";
 import ReCol from "@/components/ReCol";
-import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import { PureTableBar } from "@/components/RePureTableBar";
 import { OtaTaskStatusList } from "@/utils/const";
+import { useOTATask, useTaskDetail } from "./hook";
 
 import Delete from "@iconify-icons/ep/delete";
 import Refresh from "@iconify-icons/ep/refresh";
-import AddFill from "@iconify-icons/ri/add-circle-line";
 import View from "@iconify-icons/ep/view";
+import AddFill from "@iconify-icons/ri/add-circle-line";
 import StopFill from "@iconify-icons/ri/stop-fill";
 
 defineOptions({

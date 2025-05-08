@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
-import { FormRules } from "element-plus";
+import { OTATaskInfo, PackageInfo } from "@/api/ota";
 import ReCol from "@/components/ReCol";
 import { PureTableBar } from "@/components/RePureTableBar";
-import { OTATaskInfo, PackageInfo } from "@/api/ota";
+import { FormRules } from "element-plus";
+import { reactive, ref } from "vue";
 import { useTaskDevice } from "./hook";
 
 interface FormInline
@@ -70,7 +70,7 @@ defineExpose({ getRef, getSelectedTableData });
             <el-option
               v-for="item in props.packageList"
               :key="item._id"
-              :label="`${item.name}(${item.product.name})`"
+              :label="`${item.name}(${item.version})(${item.product.name})`"
               :value="item._id"
             />
           </el-select>

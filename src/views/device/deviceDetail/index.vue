@@ -227,7 +227,7 @@ const {
       <el-image
         v-loading="detailLoading"
         class="w-full h-[400px]"
-        :src="`http://${deviceDetail.ipAddress}:5000/video_feed`"
+        :src="`http://${deviceDetail.ipAddress}/video_feed`"
         fit="contain"
       />
     </el-card>

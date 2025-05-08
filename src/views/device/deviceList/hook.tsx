@@ -124,7 +124,7 @@ export function useDevice() {
     dataList.value = cloneDeep(newData);
     loading.value = false;
     if (!intervalId.value) {
-      intervalId.value = setInterval(onSearch, 3000);
+      intervalId.value = setInterval(onSearch, 5000);
     }
   }
 

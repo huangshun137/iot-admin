@@ -38,7 +38,10 @@ const props = withDefaults(defineProps<FormProps>(), {
 const ruleFormRef = ref();
 const newFormInline = ref(props.formInline);
 
-function handleDeviceIdUpdate() {
+function handleDeviceIdUpdate(flag) {
+  if (flag === 2 && newFormInline.value.code) {
+    newFormInline.value.code = newFormInline.value.code.toLowerCase();
+  }
   const { productId, code } = newFormInline.value;
   newFormInline.value.deviceId = (productId || "") + "_" + (code || "");
 }
@@ -65,7 +68,7 @@ defineExpose({ getRef });
             placeholder="请选择所属产品"
             class="w-full"
             :disabled="!!newFormInline._id"
-            @change="handleDeviceIdUpdate"
+            @change="handleDeviceIdUpdate(1)"
           >
             <el-option
               v-for="item in props.productList"
@@ -93,7 +96,7 @@ defineExpose({ getRef });
             clearable
             placeholder="请输入设备标识码"
             :disabled="!!newFormInline._id"
-            @change="handleDeviceIdUpdate"
+            @change="handleDeviceIdUpdate(2)"
           />
         </el-form-item>
       </re-col>
