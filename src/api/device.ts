@@ -82,6 +82,8 @@ export type AgentDeviceInfo = {
   entryName: string;
   /** 设备运行conda环境 */
   condaEnv?: string;
+  /** 设备启动命令 */
+  startCommand?: string;
 };
 // Agent绑定设备列表接口返回类型
 export type AgentDeviceInfoResult = {

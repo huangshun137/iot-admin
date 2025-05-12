@@ -25,7 +25,8 @@ const props = withDefaults(defineProps<FormProps>(), {
     agentId: null,
     directory: "",
     entryName: "",
-    condaEnv: null
+    condaEnv: null,
+    startCommand: null
   }),
   deviceList: () => [] as DeviceInfo[]
 });
@@ -112,6 +113,14 @@ defineExpose({ getRef });
           <el-input
             v-model="newFormInline.condaEnv"
             placeholder="请输入设备运行环境"
+          />
+        </el-form-item>
+      </re-col>
+      <re-col>
+        <el-form-item label="设备启动命令" prop="startCommand">
+          <el-input
+            v-model="newFormInline.startCommand"
+            placeholder="请输入设备启动命令"
           />
         </el-form-item>
       </re-col>

@@ -314,6 +314,11 @@ export function useDeviceAgent(deviceDetail, publishMessage) {
       width: 100
     },
     {
+      label: "启动命令",
+      prop: "startCommand",
+      width: 120
+    },
+    {
       label: "操作",
       fixed: "right",
       width: 210,
@@ -351,7 +356,8 @@ export function useDeviceAgent(deviceDetail, publishMessage) {
           agentId: row?.agentId ?? "",
           directory: row?.directory ?? "",
           entryName: row?.entryName ?? "",
-          condaEnv: row?.condaEnv
+          condaEnv: row?.condaEnv,
+          startCommand: row?.startCommand
         },
         deviceList: deviceList.value
       },
@@ -405,7 +411,8 @@ export function useDeviceAgent(deviceDetail, publishMessage) {
       isCustomDevice: row.isCustomDevice,
       directory: row.directory,
       entryName: row.entryName,
-      condaEnv: row.condaEnv
+      condaEnv: row.condaEnv,
+      startCommand: row.startCommand
     };
     publishMessage(topic, JSON.stringify(msg), err => {
       if (err) {
